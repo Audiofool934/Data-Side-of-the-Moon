@@ -11,12 +11,6 @@ The key idea of this project is using unsupervised learning to explore music, wh
 
 ## Model "Echoes"
 
-强调 reconstruction loss，如果不用decoder的话，老姐说的有道理；突出重点
-
-*"Echoes" is my top favorite Pink Floyd song, and the name "Echoes" it self is a good metaphor for the autoencoder model which kind like reflections between songs.*
-
-the bottleneck of the autoencoder is the "Data Side" of a given song, in this work we try our model on Pink Floyd's songs, and we call it "Data Side of the Moon".
-
 ## Discussion and future work
 
 - open world (classify things to unknown classes)
