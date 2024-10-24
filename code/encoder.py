@@ -11,32 +11,31 @@ class Encoder(nn.Module):
         self.encoder_cnn = nn.Sequential(
             nn.Conv2d(1, 32, 3, stride=2, padding=1),
             nn.BatchNorm2d(32),
-            nn.LeakyReLU(0.2, inplace=True),
+            nn.LeakyReLU(0.05, inplace=True),
             nn.Conv2d(32, 64, 3, stride=2, padding=1),
             nn.BatchNorm2d(64),
-            nn.LeakyReLU(0.2, inplace=True),
+            nn.LeakyReLU(0.05, inplace=True),
             nn.Conv2d(64, 128, 3, stride=2, padding=1),
             nn.BatchNorm2d(128),
-            nn.LeakyReLU(0.2, inplace=True),
+            nn.LeakyReLU(0.05, inplace=True),
             nn.Conv2d(128, 256, 3, stride=2, padding=1),
             nn.BatchNorm2d(256),
-            nn.LeakyReLU(0.2, inplace=True)
+            nn.LeakyReLU(0.05, inplace=True)
         )
         
         self.flatten = nn.Flatten(start_dim=1)
         
-        self.encoder_lin = nn.Sequential(
-            nn.Linear(256 * 16 * 41, 512),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Dropout(0.3),
-            nn.Linear(512, encoded_space_dim)
-        )
+        self.fc_mu = nn.Linear(256 * 16 * 41, encoded_space_dim)
+        self.fc_log_var = nn.Linear(256 * 16 * 41, encoded_space_dim)
         
     def forward(self, x):
         x = self.encoder_cnn(x)
         x = self.flatten(x)
-        x = self.encoder_lin(x)
-        return x
+        
+        mu = self.fc_mu(x)
+        log_var = self.fc_log_var(x)
+        log_var = torch.clamp(log_var, -20, 20)
+        return mu, log_var
     
 def load_encoder(model_path, encoded_space_dim):
     model = Encoder(encoded_space_dim)
@@ -49,11 +48,23 @@ def encode_data(encoder, np_array):
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     encoder = encoder.to(device)
     
-    spectrogram = np_array[np.newaxis, :, :]
+    # spectrogram = np_array[np.newaxis, :, :]
+    spectrogram = np_array.unsqueeze(0)
+    
+    # print("----------------------")
+    # print(spectrogram.shape)
+    # print("----------------------")
+    
     spectrogram_tensor = torch.tensor(spectrogram, dtype=torch.float32).to(device)
     
     with torch.no_grad():
-        encoded_spectrogram = encoder(spectrogram_tensor.unsqueeze(0))
+        mu, log_var = encoder(spectrogram_tensor)
+        
+    encoded_spectrogram = mu + torch.exp(0.5 * log_var) * torch.randn_like(mu)
+    
+    # print("----------------------")
+    # print(encoded_spectrogram.shape)
+    # print("----------------------")
     
     return encoded_spectrogram.flatten().cpu().detach().numpy()
 
@@ -63,7 +74,7 @@ def encoder_summary(encoder,input_size=(1, 256, 646)):
 
 if __name__=="__main__":
 
-    model_path="models/Echoes_128/encoder.pth"
+    model_path="models/Echoes/encoder_100.pth"
     file_path = ""
     save_path = ""
 

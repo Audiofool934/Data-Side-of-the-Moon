@@ -1,8 +1,14 @@
 import numpy as np
 import torch
+import torch.nn as nn
+
+# KL divergence function
+def kl_divergence(mu, log_var):
+    # KL Divergence between the learned Gaussian distribution and the standard Gaussian N(0,1)
+    return -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
 
 ### Training function
-def train_epoch(encoder, decoder, device, dataloader, loss_fn, optimizer):
+def train_epoch(encoder, decoder, device, dataloader, optimizer, beta):
     # Set train mode for both the encoder and the decoder
     encoder.train()
     decoder.train()
@@ -12,11 +18,17 @@ def train_epoch(encoder, decoder, device, dataloader, loss_fn, optimizer):
         # Move tensor to the proper device
         image_batch = image_batch.to(device)
         # Encode data
-        encoded_data = encoder(image_batch)
+        mu, log_var = encoder(image_batch)
         # Decode data
-        decoded_data = decoder(encoded_data)
-        # Evaluate loss
-        loss = loss_fn(decoded_data, image_batch)
+        encoded_data = mu + torch.exp(0.5 * log_var) * torch.randn_like(mu)
+        
+        reconstructed = decoder(encoded_data)
+        reconstruction_loss = nn.MSELoss()(reconstructed, image_batch)
+
+        kl_loss = kl_divergence(mu, log_var)
+
+        loss = reconstruction_loss + beta * kl_loss
+        
         # Backward pass
         optimizer.zero_grad()
         loss.backward()
@@ -28,27 +40,35 @@ def train_epoch(encoder, decoder, device, dataloader, loss_fn, optimizer):
     return np.mean(train_loss)
 
 ### Testing function
-def test_epoch(encoder, decoder, device, dataloader, loss_fn):
+def test_epoch(encoder, decoder, device, dataloader, beta):
     # Set evaluation mode for encoder and decoder
     encoder.eval()
     decoder.eval()
-    with torch.no_grad(): # No need to track the gradients
-        # Define the lists to store the outputs for each batch
-        conc_out = []
-        conc_label = []
+    val_loss = []
+    
+    with torch.no_grad():  # No need to track gradients in validation/testing
         for image_batch, _ in dataloader:
             # Move tensor to the proper device
             image_batch = image_batch.to(device)
-            # Encode data
-            encoded_data = encoder(image_batch)
+            
+            # Encode data (mu and log_var)
+            mu, log_var = encoder(image_batch)
+            # Reparameterization trick to sample latent vector z
+            encoded_data = mu + torch.exp(0.5 * log_var) * torch.randn_like(mu)
+
             # Decode data
             decoded_data = decoder(encoded_data)
-            # Append the network output and the original image to the lists
-            conc_out.append(decoded_data.cpu())
-            conc_label.append(image_batch.cpu())
-        # Create a single tensor with all the values in the lists
-        conc_out = torch.cat(conc_out)
-        conc_label = torch.cat(conc_label) 
-        # Evaluate global loss
-        val_loss = loss_fn(conc_out, conc_label)
-    return val_loss.data
+            
+            # Calculate reconstruction loss
+            reconstruction_loss = nn.MSELoss()(decoded_data, image_batch)
+
+            # Calculate KL divergence loss
+            kl_loss = kl_divergence(mu, log_var)
+            
+            # Total validation loss
+            loss = reconstruction_loss + beta * kl_loss
+            
+            # Append loss for tracking
+            val_loss.append(loss.detach().cpu().numpy())
+
+    return np.mean(val_loss)
