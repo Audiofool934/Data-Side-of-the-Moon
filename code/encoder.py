@@ -9,28 +9,27 @@ class Encoder(nn.Module):
         super(Encoder, self).__init__()
 
         self.encoder_cnn = nn.Sequential(
-            nn.Conv2d(1, 16, 3, stride=2, padding=1),
-            nn.BatchNorm2d(16),
-            nn.ReLU(True),
-            nn.Conv2d(16, 32, 3, stride=2, padding=1),
+            nn.Conv2d(1, 32, 3, stride=2, padding=1),
             nn.BatchNorm2d(32),
-            nn.ReLU(True),
+            nn.LeakyReLU(0.2, inplace=True),
             nn.Conv2d(32, 64, 3, stride=2, padding=1),
             nn.BatchNorm2d(64),
-            nn.ReLU(True),
+            nn.LeakyReLU(0.2, inplace=True),
             nn.Conv2d(64, 128, 3, stride=2, padding=1),
             nn.BatchNorm2d(128),
-            nn.ReLU(True)
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Conv2d(128, 256, 3, stride=2, padding=1),
+            nn.BatchNorm2d(256),
+            nn.LeakyReLU(0.2, inplace=True)
         )
         
         self.flatten = nn.Flatten(start_dim=1)
         
         self.encoder_lin = nn.Sequential(
-            # nn.Linear(128 * 16 * 41, encoded_space_dim),
-            
-            nn.Linear(128 * 16 * 41, 256),
-            nn.ReLU(True),
-            nn.Linear(256, encoded_space_dim)
+            nn.Linear(256 * 16 * 41, 512),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Dropout(0.3),
+            nn.Linear(512, encoded_space_dim)
         )
         
     def forward(self, x):
@@ -38,16 +37,16 @@ class Encoder(nn.Module):
         x = self.flatten(x)
         x = self.encoder_lin(x)
         return x
-
+    
 def load_encoder(model_path, encoded_space_dim):
     model = Encoder(encoded_space_dim)
-    model.load_state_dict(torch.load(model_path, map_location=torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu")))
+    model.load_state_dict(torch.load(model_path, map_location=torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")))
     model.eval()
     return model
 
 def encode_data(encoder, np_array):
     
-    device = torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu")
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     encoder = encoder.to(device)
     
     spectrogram = np_array[np.newaxis, :, :]

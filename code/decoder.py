@@ -8,28 +8,26 @@ class Decoder(nn.Module):
         super(Decoder, self).__init__()
         
         self.decoder_lin = nn.Sequential(
-            nn.Linear(encoded_space_dim, 256),
-            nn.ReLU(True),
-            nn.Linear(256, 128 * 16 * 41),
-            nn.ReLU(True)
-            
-            # nn.Linear(encoded_space_dim, 128 * 16 * 41),
-            # nn.ReLU(True)
+            nn.Linear(encoded_space_dim, 512),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Linear(512, 256 * 16 * 41),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Dropout(0.3)
         )
 
-        self.unflatten = nn.Unflatten(dim=1, unflattened_size=(128, 16, 41))
+        self.unflatten = nn.Unflatten(dim=1, unflattened_size=(256, 16, 41))
 
         self.decoder_conv = nn.Sequential(
-            nn.ConvTranspose2d(128, 64, 3, stride=2, padding=1, output_padding=(1, 0)),
+            nn.ConvTranspose2d(256, 128, 3, stride=2, padding=1, output_padding=(1, 0)),
+            nn.BatchNorm2d(128),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.ConvTranspose2d(128, 64, 3, stride=2, padding=1, output_padding=(1, 1)),
             nn.BatchNorm2d(64),
-            nn.ReLU(True),
-            nn.ConvTranspose2d(64, 32, 3, stride=2, padding=1, output_padding=(1, 1)),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.ConvTranspose2d(64, 32, 3, stride=2, padding=1, output_padding=(1, 0)),
             nn.BatchNorm2d(32),
-            nn.ReLU(True),
-            nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=(1, 0)),
-            nn.BatchNorm2d(16),
-            nn.ReLU(True),
-            nn.ConvTranspose2d(16, 1, 3, stride=2, padding=1, output_padding=(1, 1))
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.ConvTranspose2d(32, 1, 3, stride=2, padding=1, output_padding=(1, 1))
         )
 
     def forward(self, x):
@@ -40,13 +38,13 @@ class Decoder(nn.Module):
 
 def load_decoder(model_path, encoded_space_dim):
     model = Decoder(encoded_space_dim)
-    model.load_state_dict(torch.load(model_path))
+    model.load_state_dict(torch.load(model_path, map_location=torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")))
     model.eval()  # Set the model to evaluation mode
     return model
 
 def decode_data(decoder, vector):
         
-    device = torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu")
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     # device = torch.device("cpu")
      
     if isinstance(vector,str):

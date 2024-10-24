@@ -23,7 +23,7 @@ if __name__ == "__main__":
     
     formats = ['.mp3', '.wav', '.flac'] 
     
-    root_path="data/audio/testsongs"
-    save_path="data/spec/testsongs2"
+    root_path="data/audio/GTZAN"
+    save_path="data/spec/GTZAN"
     
     spec_convert_folder(root_path, save_path, formats)
