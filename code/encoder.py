@@ -11,23 +11,23 @@ class Encoder(nn.Module):
         self.encoder_cnn = nn.Sequential(
             nn.Conv2d(1, 32, 3, stride=2, padding=1),
             nn.BatchNorm2d(32),
-            nn.LeakyReLU(0.2, inplace=True),
+            nn.LeakyReLU(0.05, inplace=True),
             nn.Conv2d(32, 64, 3, stride=2, padding=1),
             nn.BatchNorm2d(64),
-            nn.LeakyReLU(0.2, inplace=True),
+            nn.LeakyReLU(0.05, inplace=True),
             nn.Conv2d(64, 128, 3, stride=2, padding=1),
             nn.BatchNorm2d(128),
-            nn.LeakyReLU(0.2, inplace=True),
+            nn.LeakyReLU(0.05, inplace=True),
             nn.Conv2d(128, 256, 3, stride=2, padding=1),
             nn.BatchNorm2d(256),
-            nn.LeakyReLU(0.2, inplace=True)
+            nn.LeakyReLU(0.05, inplace=True)
         )
         
         self.flatten = nn.Flatten(start_dim=1)
         
         self.encoder_lin = nn.Sequential(
             nn.Linear(256 * 16 * 41, 512),
-            nn.LeakyReLU(0.2, inplace=True),
+            nn.LeakyReLU(0.05, inplace=True),
             nn.Dropout(0.3),
             nn.Linear(512, encoded_space_dim)
         )

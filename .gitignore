@@ -1,2 +1,8 @@
 .DS_Store
 code/__pycache__/
+code/data/audio/GTZAN
+code/data/audio/Pink Floyd
+code/data/audiotestsongs
+code/data/spec/GTZAN_646
+code/data/spec/testsongs_646
+code/models/Echoes

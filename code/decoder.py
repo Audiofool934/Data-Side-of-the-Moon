@@ -9,9 +9,9 @@ class Decoder(nn.Module):
         
         self.decoder_lin = nn.Sequential(
             nn.Linear(encoded_space_dim, 512),
-            nn.LeakyReLU(0.2, inplace=True),
+            nn.LeakyReLU(0.05, inplace=True),
             nn.Linear(512, 256 * 16 * 41),
-            nn.LeakyReLU(0.2, inplace=True),
+            nn.LeakyReLU(0.05, inplace=True),
             nn.Dropout(0.3)
         )
 
@@ -20,13 +20,13 @@ class Decoder(nn.Module):
         self.decoder_conv = nn.Sequential(
             nn.ConvTranspose2d(256, 128, 3, stride=2, padding=1, output_padding=(1, 0)),
             nn.BatchNorm2d(128),
-            nn.LeakyReLU(0.2, inplace=True),
+            nn.LeakyReLU(0.05, inplace=True),
             nn.ConvTranspose2d(128, 64, 3, stride=2, padding=1, output_padding=(1, 1)),
             nn.BatchNorm2d(64),
-            nn.LeakyReLU(0.2, inplace=True),
+            nn.LeakyReLU(0.05, inplace=True),
             nn.ConvTranspose2d(64, 32, 3, stride=2, padding=1, output_padding=(1, 0)),
             nn.BatchNorm2d(32),
-            nn.LeakyReLU(0.2, inplace=True),
+            nn.LeakyReLU(0.05, inplace=True),
             nn.ConvTranspose2d(32, 1, 3, stride=2, padding=1, output_padding=(1, 1))
         )
 
