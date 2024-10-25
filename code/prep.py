@@ -23,7 +23,12 @@ if __name__ == "__main__":
     
     formats = ['.mp3', '.wav', '.flac'] 
     
-    root_path="data/audio/GTZAN"
-    save_path="data/spec/GTZAN"
+    root_path="data/audio/fma_small_by_genre/genre_unknown"
+    save_path="data/spec/fma_small/genre_unknown"
+    
+    # Experimental 有一个错？
+    # Error processing file data/audio/fma_small_by_genre/genre_unknown/108925.mp3: 
+    # ^[[D[src/libmpg123/parse.c:do_readahead():1099] warning: Cannot read next header, a one-frame stream? Duh...
+    # Error processing file data/audio/fma_small_by_genre/genre_unknown/099134.mp3: 
     
     spec_convert_folder(root_path, save_path, formats)

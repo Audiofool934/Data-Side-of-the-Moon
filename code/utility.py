@@ -15,29 +15,29 @@ def normalize_log_mel_spec(log_mel_spec, max=1, min=0):
     return norm_spec
 
 def convert_to_spec(path, save_path):
+    try:
+        # 加载音频文件，指定15秒的持续时间
+        y, sr = librosa.load(path, duration=15)
 
-    y, sr = librosa.load(path, duration=15)
+        # 计算梅尔频谱图
+        mel_spec = librosa.feature.melspectrogram(
+            y=y, sr=sr, n_mels=256, n_fft=2048, hop_length=512
+        )
 
-    mel_spec = librosa.feature.melspectrogram(
-        y=y, sr=sr, n_mels=256, n_fft=2048, hop_length=512
-    )
-    # Convert to log scale (dB). We'll use the peak power as reference.
-    log_mel_spec = librosa.power_to_db(mel_spec, ref=np.max)
-    # make dimensions of the array even 128x1292
-    # log_mel_spec = np.resize(log_mel_spec,(256,1292))
+        # 将功率谱转换为对数刻度（dB）
+        log_mel_spec = librosa.power_to_db(mel_spec, ref=np.max)
 
-    # print(log_mel_spec.shape)
+        # 归一化对数梅尔频谱图
+        log_mel_spec = normalize_log_mel_spec(log_mel_spec)
 
-    # librosa.display.specshow(log_mel_spec, sr=sr, hop_length=512)
-    # plt.show()
+        # 保存为.npy文件
+        np.save(save_path, log_mel_spec, allow_pickle=True)
 
-    # print(log_mel_spec)
+    except Exception as e:
+        # 捕获异常并输出错误信息和文件名
+        print(f"Error processing file {path}: {e}")
+        return None  # 可以选择返回 None 或其他错误指示符
 
-    log_mel_spec = normalize_log_mel_spec(log_mel_spec)
-
-    # log_mel_spec_norm=log_mel_spec_norm[:,:640]
-
-    np.save(save_path, log_mel_spec, allow_pickle=True)
 
 
 def create_directory_structure(root_path, save_path, file_path, formats):
