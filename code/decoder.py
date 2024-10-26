@@ -37,6 +37,7 @@ class Decoder(nn.Module):
         return x
 
 def load_decoder(model_path, encoded_space_dim):
+
     model = Decoder(encoded_space_dim)
     model.load_state_dict(torch.load(model_path, map_location=torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")))
     model.eval()  # Set the model to evaluation mode

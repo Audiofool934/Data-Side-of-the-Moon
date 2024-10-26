@@ -3,7 +3,6 @@ from torch import nn
 import numpy as np
 from torchsummary import summary
 
-
 class Encoder(nn.Module):
     def __init__(self, encoded_space_dim):
         super(Encoder, self).__init__()
@@ -39,6 +38,7 @@ class Encoder(nn.Module):
         return x
     
 def load_encoder(model_path, encoded_space_dim):
+    
     model = Encoder(encoded_space_dim)
     model.load_state_dict(torch.load(model_path, map_location=torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")))
     model.eval()
@@ -70,7 +70,7 @@ if __name__=="__main__":
     encoded_space_dim = 128
     encoder = load_encoder(model_path, encoded_space_dim)
     
-    encoder_summary(Encoder, input_size=(64, 1, 256, 646))
+    encoder_summary(encoder, input_size=(1, 256, 646))
 
     # np_array = np.load(file_path)
     # encoded_result = encode_data(encoder, np_array)
