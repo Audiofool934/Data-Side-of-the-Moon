@@ -21,21 +21,36 @@ class Encoder(nn.Module):
             nn.BatchNorm2d(256),
             nn.LeakyReLU(0.05, inplace=True)
         )
-        
+    
         self.flatten = nn.Flatten(start_dim=1)
         
-        self.encoder_lin = nn.Sequential(
-            nn.Linear(256 * 16 * 41, 512),
-            nn.LeakyReLU(0.05, inplace=True),
-            nn.Dropout(0.3),
-            nn.Linear(512, encoded_space_dim)
-        )
+        self.fc_mu = nn.Linear(256 * 16 * 41, encoded_space_dim)
+        self.fc_log_var = nn.Linear(256 * 16 * 41, encoded_space_dim)
         
     def forward(self, x):
         x = self.encoder_cnn(x)
         x = self.flatten(x)
-        x = self.encoder_lin(x)
-        return x
+        
+        mu = self.fc_mu(x)
+        log_var = self.fc_log_var(x)
+        # log_var = torch.clamp(log_var, -20, 20)
+        
+        return mu, log_var
+            
+    #     self.flatten = nn.Flatten(start_dim=1)
+        
+    #     self.encoder_lin = nn.Sequential(
+    #         nn.Linear(256 * 16 * 41, 512),
+    #         nn.LeakyReLU(0.05, inplace=True),
+    #         nn.Dropout(0.3),
+    #         nn.Linear(512, encoded_space_dim)
+    #     )
+        
+    # def forward(self, x):
+    #     x = self.encoder_cnn(x)
+    #     x = self.flatten(x)
+    #     x = self.encoder_lin(x)
+    #     return x
     
 def load_encoder(model_path, encoded_space_dim):
     

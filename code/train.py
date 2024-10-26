@@ -1,7 +1,11 @@
 import numpy as np
 import torch
 
-def train_epoch(encoder, decoder, device, dataloader, loss_fn, optimizer):
+def kl_divergence(mu, log_var):
+    # KL Divergence between the learned Gaussian distribution and the standard Gaussian N(0,1)
+    return -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
+
+def train_epoch(encoder, decoder, device, dataloader, loss_fn, optimizer, beta):
     encoder.train()
     decoder.train()
     train_loss = []
@@ -10,41 +14,47 @@ def train_epoch(encoder, decoder, device, dataloader, loss_fn, optimizer):
 
         image_batch = image_batch.to(device)
         
-        encoded_data = encoder(image_batch)
-        decoded_data = decoder(encoded_data)
-
-        loss = loss_fn(decoded_data, image_batch)
-        # print(loss, decoded_data.shape, image_batch.shape)
+        mu, log_var = encoder(image_batch)
+        kl_loss = kl_divergence(mu, log_var)
+        
+        encoded_data = mu + torch.exp(0.5 * log_var) * torch.randn_like(mu)
+        recon = decoder(encoded_data)
+        recon_loss = loss_fn(recon, image_batch)
+        # print("encoded_data: ", encoded_data[0][:10])
+        
+        loss = recon_loss + beta * kl_loss
+        
+        # print(f"recon_loss: {recon_loss} \n kl_loss: {kl_loss} \n")
+        # print(f"mu: {mu[0][:10]} \n log_var: {log_var[0][:10]}")
         
         # bp
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-        # print('\t train loss: %f' % (loss.data))
-        train_loss.append(loss.cpu().numpy())
+        train_loss.append(loss.detach().cpu().numpy())
 
     return np.mean(train_loss)
 
 
-def test_epoch(encoder, decoder, device, dataloader, loss_fn):
+def test_epoch(encoder, decoder, device, dataloader, loss_fn, beta):
     encoder.eval()
     decoder.eval()
+    val_loss = []
     
     with torch.no_grad():
-        orig_images = []
-        recon_images = []
         
         for image_batch, _ in dataloader:
             image_batch = image_batch.to(device)
-            encoded_data = encoder(image_batch)
-            decoded_data = decoder(encoded_data)
-
-            recon_images.append(decoded_data.cpu())
-            orig_images.append(image_batch.cpu())
-
-        recon_images = torch.cat(recon_images)
-        orig_images = torch.cat(orig_images) 
-
-        val_loss = loss_fn(recon_images, orig_images)
-    return val_loss.data
+            
+            mu, log_var = encoder(image_batch)
+            kl_loss = kl_divergence(mu, log_var)
+            
+            encoded_data = mu + torch.exp(0.5 * log_var) * torch.randn_like(mu)
+            recon = decoder(encoded_data)
+            recon_loss = loss_fn(recon, image_batch)    
+            
+            loss = recon_loss + beta * kl_loss
+            val_loss.append(loss.cpu().numpy())
+            
+        return np.mean(val_loss)
