@@ -1,9 +1,11 @@
 import numpy as np
 import torch
 
+
 def kl_divergence(mu, log_var):
     # KL Divergence between the learned Gaussian distribution and the standard Gaussian N(0,1)
     return -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
+
 
 def train_epoch(encoder, decoder, device, dataloader, loss_fn, optimizer, beta):
     encoder.train()

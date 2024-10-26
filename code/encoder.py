@@ -52,6 +52,7 @@ class Encoder(nn.Module):
     #     x = self.encoder_lin(x)
     #     return x
     
+
 def load_encoder(model_path, encoded_space_dim):
     
     model = Encoder(encoded_space_dim)
@@ -59,22 +60,27 @@ def load_encoder(model_path, encoded_space_dim):
     model.eval()
     return model
 
+    
 def encode_data(encoder, np_array):
     
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     encoder = encoder.to(device)
     
-    spectrogram = np_array[np.newaxis, :, :]
+    spectrogram = np_array.unsqueeze(0)
     spectrogram_tensor = torch.tensor(spectrogram, dtype=torch.float32).to(device)
     
     with torch.no_grad():
-        encoded_spectrogram = encoder(spectrogram_tensor.unsqueeze(0))
+        mu, log_var = encoder(spectrogram_tensor)
+        
+    encoded_spectrogram = mu + torch.exp(0.5 * log_var) * torch.randn_like(mu)
     
     return encoded_spectrogram.flatten().cpu().detach().numpy()
+
 
 def encoder_summary(encoder,input_size=(1, 256, 646)):
     print("Encoder summary:")
     summary(encoder, input_size=input_size)
+
 
 if __name__=="__main__":
 
