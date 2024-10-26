@@ -70,7 +70,7 @@ if __name__=="__main__":
     encoded_space_dim = 128
     encoder = load_encoder(model_path, encoded_space_dim)
     
-    encoder_summary(encoder, input_size=(1, 256, 646))
+    encoder_summary(Encoder, input_size=(64, 1, 256, 646))
 
     # np_array = np.load(file_path)
     # encoded_result = encode_data(encoder, np_array)

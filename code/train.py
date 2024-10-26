@@ -17,6 +17,8 @@ def train_epoch(encoder, decoder, device, dataloader, loss_fn, optimizer):
         decoded_data = decoder(encoded_data)
         # Evaluate loss
         loss = loss_fn(decoded_data, image_batch)
+        # print(loss, decoded_data.shape, image_batch.shape)
+        
         # Backward pass
         optimizer.zero_grad()
         loss.backward()

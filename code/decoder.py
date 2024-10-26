@@ -9,13 +9,13 @@ class Decoder(nn.Module):
         
         self.decoder_lin = nn.Sequential(
             nn.Linear(encoded_space_dim, 512),
-            nn.LeakyReLU(0.05, inplace=True),
+            nn.LeakyReLU(0.05, inplace = True),
             nn.Linear(512, 256 * 16 * 41),
-            nn.LeakyReLU(0.05, inplace=True),
+            nn.LeakyReLU(0.05, inplace = True),
             nn.Dropout(0.3)
         )
 
-        self.unflatten = nn.Unflatten(dim=1, unflattened_size=(256, 16, 41))
+        self.unflatten = nn.Unflatten(dim = 1, unflattened_size = (256, 16, 41))
 
         self.decoder_conv = nn.Sequential(
             nn.ConvTranspose2d(256, 128, 3, stride=2, padding=1, output_padding=(1, 0)),
@@ -63,21 +63,21 @@ def decode_data(decoder, vector):
 
     return  decoded_result.squeeze().cpu().detach().numpy()
 
-def encoder_summary(decoder,input_size=64):
+def encoder_summary(decoder, input_size = 128):
     print("\nDecoder summary:")
     summary(decoder, (input_size,))
 
 if __name__=="__main__":
     
-    model_path="models/Echoes/decoder.pth"
-    file_path='Whole Lotta Love.npy'
-    save_path="Whole Lotta Love_Recon.npy"
+    model_path = "models/Echoes/decoder.pth"
+    file_path = 'Whole Lotta Love.npy'
+    save_path = "Whole Lotta Love_Recon.npy"
     
     encoded_space_dim = 128
     
     # decoder = load_decoder(model_path, encoded_space_dim)
-    decoder=Decoder(encoded_space_dim=encoded_space_dim)
-    encoder_summary(decoder=decoder, input_size=encoded_space_dim)
+    decoder = Decoder(encoded_space_dim = encoded_space_dim)
+    encoder_summary(decoder = decoder, input_size = encoded_space_dim)
     
     # decoded_result=decode_data(decoder, file_path)
     # np.save(save_path, decoded_result)
