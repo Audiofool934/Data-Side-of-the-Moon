@@ -18,25 +18,32 @@ The key idea of this project is using **unsupervised learning** to explore music
 
 <p align="center">
 <img src="media/architecture.png" alt="echoes_arc" width="500px">
-"Echoes" model architecture
 </p>
-
+<p align = 'center'>
+<i>"Echoes" model architecture</i>
+</p>
 
 <p align="center">
 <img src="media/train.png" alt="training" width="500px">
-"Echoes" model training
+</p>
+<p align = 'center'>
+<i>"Echoes" model training</i>
 </p>
 
 <p align="center">
 <img src="media/GTZAN_test.png" alt="GTZAN_test" width="500px">
-Latent vectors of GTZAN testset
+</p>
+<p align = 'center'>
+<i>Latent vectors of GTZAN testset</i>
 </p>
 
 ## Pink Floyd
 
 <p align="center">
 <img src="media/PF_album_year.png" alt="PF_album_year" width="500px">
-PF albums - clusters - years
+</p>
+<p align="center>
+<i>PF albums - clusters - years</i>
 </p>
 
 ## Discussion and future work
