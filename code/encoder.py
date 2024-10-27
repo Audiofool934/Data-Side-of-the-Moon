@@ -84,11 +84,11 @@ def encoder_summary(encoder,input_size=(1, 256, 646)):
 
 if __name__=="__main__":
 
-    model_path="models/Echoes_128/encoder.pth"
+    model_path="models/Echoes/encoder_280.pth"
     file_path = ""
     save_path = ""
 
-    encoded_space_dim = 128
+    encoded_space_dim = 1024
     encoder = load_encoder(model_path, encoded_space_dim)
     
     encoder_summary(encoder, input_size=(1, 256, 646))
