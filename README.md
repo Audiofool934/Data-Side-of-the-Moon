@@ -1,7 +1,5 @@
 # Data Side of the Moon
 
-## Decoding Pink Floyd’s Legacy
-
 ![Data Side of the Moon](media/DSOTM.png)
 
 <p align = 'center'>
@@ -37,7 +35,7 @@ The key idea of this project is using **unsupervised learning** to explore music
 <i>Latent vectors of GTZAN testset</i>
 </p>
 
-## Pink Floyd
+## Decoding Pink Floyd’s Legacy
 
 <p align="center">
 <img src="media/PF_album_year.png" alt="PF_album_year" width="500px">
